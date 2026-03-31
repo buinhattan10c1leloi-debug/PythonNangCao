@@ -4,10 +4,10 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 import sqlalchemy as sa
 from app import db
-# BỔ SUNG: Thêm OfflineAppointmentForm và PrescriptionForm vào danh sách import
+# Import đầy đủ các Form cần thiết
 from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, \
     MessageForm, AppointmentForm, MedicalRecordForm, OfflineAppointmentForm, PrescriptionForm
-# THÊM Medicine vào danh sách models
+# Import đầy đủ các Model bao gồm cả Medicine
 from app.models import User, Post, Message, Notification, Appointment, MedicalRecord, Medicine
 from app.translate import translate
 from app.main import bp
@@ -197,10 +197,9 @@ def examine(appointment_id):
         flash(_('Không tìm thấy lịch hẹn.'))
         return redirect(url_for('main.doctor_dashboard'))
 
-    # Lấy danh sách thuốc để bác sĩ chọn từ mục lục bên trái trang khám
+    # THÊM: Lấy danh sách thuốc để bác sĩ chọn từ mục lục
     medicines = db.session.scalars(sa.select(Medicine).order_by(Medicine.name.asc())).all()
 
-    # Sử dụng PrescriptionForm để kê đơn thuốc chuyên sâu
     form = PrescriptionForm()
     if form.validate_on_submit():
         record = MedicalRecord(
@@ -212,7 +211,7 @@ def examine(appointment_id):
         apt.status = 'Completed'
         db.session.add(record)
         db.session.commit()
-        flash(_('Đã hoàn tất khám bệnh và gửi đơn thuốc sang Quầy thuốc.'))
+        flash(_('Đã hoàn tất khám bệnh.'))
         return redirect(url_for('main.doctor_dashboard'))
     return render_template('examine.html', title=_('Khám bệnh'), form=form, apt=apt, medicines=medicines)
 
@@ -301,7 +300,7 @@ def admin_change_password(user_id):
         
     return redirect(url_for('main.admin_dashboard'))
 
-# --- TÍNH NĂNG NÂNG CAO CHO BÁC SĨ & PHÒNG THUỐC ---
+# --- TÍNH NĂNG NÂNG CAO CHO BÁC SĨ ---
 
 @bp.route('/doctor/create_offline', methods=['GET', 'POST'])
 @login_required
@@ -327,10 +326,14 @@ def create_offline():
         return redirect(url_for('main.doctor_dashboard'))
         
     return render_template('create_offline.html', title='Tạo lịch trực tiếp', form=form)
-
-@bp.route('/pharmacy/dashboard')
+@bp.route('/doctor/cancel_appointment/<int:id>', methods=['POST'])
 @login_required
-def pharmacy_dashboard():
-    query = sa.select(MedicalRecord).order_by(MedicalRecord.timestamp.desc())
-    records = db.session.scalars(query).all()
-    return render_template('pharmacy_dashboard.html', title='Quầy thuốc Tony', records=records)
+def doctor_cancel_appointment(id):
+    if current_user.role != 'doctor':
+        return redirect(url_for('main.index'))
+    apt = db.session.get(Appointment, id)
+    if apt and apt.doctor_id == current_user.id:
+        apt.status = 'Cancelled'
+        db.session.commit()
+        flash(_('Đã hủy lịch hẹn của bệnh nhân.'))
+    return redirect(url_for('main.doctor_dashboard'))

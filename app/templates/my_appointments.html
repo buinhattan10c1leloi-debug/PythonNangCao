@@ -4,7 +4,7 @@
 <div class="container mt-2">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
         <h2 class="text-primary mb-0"><i class="fa-solid fa-clipboard-user me-2"></i> Lịch hẹn của tôi</h2>
-        <a href="{{ url_for('main.book_appointment') }}" class="btn btn-outline-primary rounded-pill">
+        <a href="{{ url_for('main.book_appointment') }}" class="btn btn-outline-primary rounded-pill shadow-sm">
             <i class="fa-solid fa-plus me-1"></i> Đặt lịch mới
         </a>
     </div>
@@ -12,8 +12,12 @@
     <div class="row">
         {% for apt in appointments %}
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card shadow-sm h-100 border-0 border-top border-4 
-                {% if apt.status == 'Confirmed' %}border-success{% elif apt.status == 'Pending' %}border-warning{% else %}border-secondary{% endif %}">
+            {% set border_class = 'border-success' if apt.status == 'Completed' 
+                             else 'border-warning' if apt.status == 'Confirmed'
+                             else 'border-danger' if apt.status == 'Cancelled'
+                             else 'border-info' %}
+            
+            <div class="card shadow-sm h-100 border-0 border-top border-4 {{ border_class }}">
                 
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
@@ -22,9 +26,13 @@
                         </h5>
                         
                         {% if apt.status == 'Pending' %}
-                            <span class="badge bg-warning text-dark rounded-pill px-2 py-1"><i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác nhận</span>
+                            <span class="badge bg-info rounded-pill px-2 py-1"><i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác nhận</span>
                         {% elif apt.status == 'Confirmed' %}
-                            <span class="badge bg-success rounded-pill px-2 py-1"><i class="fa-solid fa-check me-1"></i> Đã xác nhận</span>
+                            <span class="badge bg-warning text-dark rounded-pill px-2 py-1"><i class="fa-solid fa-calendar-check me-1"></i> Đã duyệt</span>
+                        {% elif apt.status == 'Completed' %}
+                            <span class="badge bg-success rounded-pill px-2 py-1"><i class="fa-solid fa-check-double me-1"></i> Khám xong</span>
+                        {% elif apt.status == 'Cancelled' %}
+                            <span class="badge bg-danger rounded-pill px-2 py-1"><i class="fa-solid fa-circle-xmark me-1"></i> Đã hủy</span>
                         {% else %}
                             <span class="badge bg-secondary rounded-pill px-2 py-1">{{ apt.status }}</span>
                         {% endif %}
@@ -36,22 +44,30 @@
                             <span class="d-block text-muted small">Th{{ apt.appointment_date.strftime('%m') if apt.appointment_date else '--' }}</span>
                         </div>
                         <div>
-                            <p class="mb-1 text-muted"><i class="fa-regular fa-calendar-days me-2"></i>{{ apt.appointment_date }}</p>
-                            <p class="mb-0 fw-bold text-dark"><i class="fa-regular fa-clock me-2 text-muted"></i>{{ apt.appointment_time }}</p>
+                            <p class="mb-1 text-muted small"><i class="fa-regular fa-calendar-days me-1"></i> Ngày: {{ apt.appointment_date }}</p>
+                            <p class="mb-0 fw-bold text-dark"><i class="fa-regular fa-clock me-1 text-muted"></i> Giờ: {{ apt.appointment_time }}</p>
                         </div>
                     </div>
                     
-                    <div class="bg-light p-3 rounded-3 mt-3 border">
-                        <small class="text-muted d-block mb-1 fw-bold">Triệu chứng/Ghi chú:</small>
-                        <span class="fst-italic">{{ apt.notes if apt.notes else 'Không có ghi chú' }}</span>
+                    <div class="bg-light p-2 rounded-3 mt-3 border border-light">
+                        <small class="text-muted d-block mb-1 fw-bold">Ghi chú của bạn:</small>
+                        <span class="small fst-italic">{{ apt.notes if apt.notes else 'Không có ghi chú' }}</span>
                     </div>
+
+                    {% if apt.status == 'Completed' %}
+                    <div class="mt-3 d-grid">
+                        <a href="{{ url_for('main.medical_history') }}" class="btn btn-success btn-sm rounded-pill fw-bold shadow-sm">
+                            <i class="fa-solid fa-file-medical me-1"></i> Xem hồ sơ bệnh án
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
                 
                 {% if apt.status == 'Pending' %}
                 <div class="card-footer bg-white border-0 text-end pb-3">
-                    <form action="{{ url_for('main.cancel_appointment', id=apt.id) }}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này không?');">
-                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                            <i class="fa-solid fa-xmark me-1"></i> Hủy lịch
+                    <form action="{{ url_for('main.cancel_appointment', id=apt.id) }}" method="post" onsubmit="return confirm('Bạn muốn hủy lịch này?');">
+                        <button class="btn btn-sm btn-link text-danger text-decoration-none p-0">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy yêu cầu
                         </button>
                     </form>
                 </div>
@@ -60,16 +76,13 @@
         </div>
         {% else %}
         <div class="col-12 text-center py-5">
-            <div class="p-5 bg-white rounded-4 shadow-sm">
-                <i class="fa-regular fa-calendar-xmark fa-4x text-muted mb-3 opacity-50"></i>
+            <div class="p-5 bg-white rounded-4 shadow-sm border">
+                <i class="fa-regular fa-calendar-xmark fa-4x text-muted mb-3 opacity-25"></i>
                 <h4 class="text-muted fw-bold">Bạn chưa có lịch hẹn nào</h4>
-                <p class="text-secondary">Hãy đặt lịch khám để bác sĩ của chúng tôi có thể chăm sóc sức khỏe cho bạn.</p>
-                <a href="{{ url_for('main.book_appointment') }}" class="btn btn-primary btn-lg mt-3 rounded-pill px-5 fw-bold shadow">
-                    <i class="fa-solid fa-calendar-plus me-2"></i> Đặt lịch ngay
-                </a>
+                <a href="{{ url_for('main.book_appointment') }}" class="btn btn-primary mt-3 rounded-pill px-5 fw-bold shadow">Đặt lịch ngay</a>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-{% endblock %}  
+{% endblock %}

@@ -1,75 +1,108 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-2">
-    <h2 class="mb-3 text-primary">
-        <i class="fa-solid fa-clipboard-list me-2"></i> Danh sách bệnh nhân chờ khám
-    </h2>
-    <p class="text-muted fs-5">
-        Chào Bác sĩ <strong>{{ current_user.username }}</strong>, đây là danh sách bệnh nhân đã đăng ký khám với bạn.
-    </p>
-    <hr class="mb-4">
+<div class="container-fluid mt-2 mb-5">
+    <div class="card bg-primary text-white border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-user-doctor fa-3x me-4"></i>
+                <div>
+                    <h2 class="fw-bold mb-1">Xin chào, Bác sĩ {{ current_user.username }}!</h2>
+                    <p class="mb-0 opacity-75 fs-5">Quản lý danh sách bệnh nhân và lịch hẹn khám bệnh.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow border-0 rounded-4 overflow-hidden">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-primary text-center">
+                    <thead class="table-light text-center">
                         <tr>
-                            <th class="text-start ps-4">Bệnh nhân</th>
-                            <th>Ngày khám</th>
-                            <th>Giờ khám</th>
-                            <th class="text-start">Triệu chứng</th>
+                            <th class="text-start ps-4 py-3">Bệnh nhân</th>
+                            <th>Thời gian hẹn</th>
+                            <th class="text-start" style="width: 25%;">Triệu chứng / Ghi chú</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <th class="text-end pe-4">Thao tác xử lý</th>
                         </tr>
                     </thead>
-                    <tbody class="text-center">
+                    <tbody>
                         {% for apt in appointments %}
                         <tr>
-                            <td class="text-start ps-4">
-                                <i class="fa-solid fa-user-injured text-secondary me-2"></i> 
-                                <span class="fw-bold">{{ apt.patient.username }}</span>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center py-2">
+                                    {% if apt.patient %}
+                                        <img src="{{ apt.patient.avatar(45) }}" class="rounded-circle shadow-sm border me-3">
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark">{{ apt.patient.username }}</h6>
+                                            <small class="text-muted">Tài khoản Web</small>
+                                        </div>
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 45px; height: 45px;">
+                                            <i class="fa-solid fa-user-tag"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-success">Khách trực tiếp</h6>
+                                            <small class="text-muted">Tại quầy</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </td>
-                            <td>{{ apt.appointment_date }}</td>
-                            <td>
-                                <i class="fa-regular fa-clock text-muted me-1"></i> 
-                                <strong>{{ apt.appointment_time }}</strong>
+
+                            <td class="text-center">
+                                <div class="fw-bold text-dark">{{ apt.appointment_date }}</div>
+                                <div class="badge bg-light text-primary border border-primary-subtle">
+                                    {{ apt.appointment_time }}
+                                </div>
                             </td>
-                            <td class="text-start text-muted">{{ apt.notes }}</td>
-                            <td>
+
+                            <td class="text-start">
+                                <div class="small text-muted text-truncate-2">
+                                    {{ apt.notes if apt.notes else 'Không có ghi chú' }}
+                                </div>
+                            </td>
+
+                            <td class="text-center">
                                 {% if apt.status == 'Pending' %}
-                                    <span class="badge bg-warning text-dark px-2 py-1 rounded-pill">
-                                        <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác nhận
-                                    </span>
+                                    <span class="badge bg-info px-3 py-2 rounded-pill shadow-sm">Chờ duyệt</span>
                                 {% elif apt.status == 'Confirmed' %}
-                                    <span class="badge bg-success px-2 py-1 rounded-pill">
-                                        <i class="fa-solid fa-check me-1"></i> Đã xác nhận
-                                    </span>
+                                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm">Đã duyệt</span>
+                                {% elif apt.status == 'Completed' %}
+                                    <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm">Đã khám xong</span>
+                                {% elif apt.status == 'Cancelled' %}
+                                    <span class="badge bg-danger px-3 py-2 rounded-pill shadow-sm">Đã hủy</span>
                                 {% else %}
-                                    <span class="badge bg-secondary px-2 py-1 rounded-pill">{{ apt.status }}</span>
+                                    <span class="badge bg-secondary px-3 py-2 rounded-pill">{{ apt.status }}</span>
                                 {% endif %}
                             </td>
-                            <td>
+
+                            <td class="text-end pe-4">
                                 {% if apt.status == 'Pending' %}
-                                <form action="{{ url_for('main.confirm_appointment', id=apt.id) }}" method="post" class="d-inline">
-                                    <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
-                                        <i class="fa-solid fa-clipboard-check me-1"></i> Xác nhận khám
-                                    </button>
-                                </form>
-                                {% else %}
-                                    <span class="text-success" title="Hoàn tất">
-                                        <i class="fa-solid fa-circle-check fa-xl"></i>
-                                    </span>
+                                    <form action="{{ url_for('main.confirm_appointment', id=apt.id) }}" method="post" class="d-inline">
+                                        <button class="btn btn-warning btn-sm rounded-pill px-3 fw-bold shadow-sm">Duyệt</button>
+                                    </form>
+                                {% elif apt.status == 'Confirmed' %}
+                                    <a href="{{ url_for('main.examine', appointment_id=apt.id) }}" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                                        <i class="fa-solid fa-stethoscope"></i> Khám
+                                    </a>
+                                {% endif %}
+
+                                {% if apt.status in ['Pending', 'Confirmed'] %}
+                                    <form action="{{ url_for('main.doctor_cancel_appointment', id=apt.id) }}" method="post" class="d-inline" onsubmit="return confirm('Bạn muốn hủy lịch này?');">
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-1">Hủy</button>
+                                    </form>
+                                {% endif %}
+                                
+                                {% if apt.status == 'Completed' %}
+                                    <span class="text-success fw-bold small"><i class="fa-solid fa-check-double"></i> Đã xong</span>
                                 {% endif %}
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-folder-open fa-3x text-light mb-3"></i>
-                                <h5>Chưa có lịch hẹn nào</h5>
-                                <p class="mb-0">Hiện tại bác sĩ không có bệnh nhân nào đang chờ khám.</p>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <h5>Chưa có lịch hẹn nào.</h5>
                             </td>
                         </tr>
                         {% endfor %}
@@ -79,4 +112,13 @@
         </div>
     </div>
 </div>
+
+<style>
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
+    }
+</style>
 {% endblock %}

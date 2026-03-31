@@ -79,26 +79,11 @@
                                     <i class="fa-solid fa-shield-halved"></i> Quản trị Hệ thống
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-success fw-bold" href="{{ url_for('main.pharmacy_dashboard') }}">
-                                    <i class="fa-solid fa-capsules"></i> Quầy thuốc
-                                </a>
-                            </li>
                             
                         {% elif current_user.role == 'doctor' %}
                             <li class="nav-item">
                                 <a class="nav-link active" href="{{ url_for('main.doctor_dashboard') }}">
                                     <i class="fa-solid fa-user-doctor"></i> Lịch khám sắp tới
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-info fw-bold" href="{{ url_for('main.create_offline') }}">
-                                    <i class="fa-solid fa-calendar-plus"></i> Khám trực tiếp
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-success fw-bold" href="{{ url_for('main.pharmacy_dashboard') }}">
-                                    <i class="fa-solid fa-capsules"></i> Quầy thuốc
                                 </a>
                             </li>
                             
