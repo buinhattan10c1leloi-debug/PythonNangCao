@@ -1,12 +1,63 @@
-{% extends 'base.html' %}
-{% import "bootstrap_wtf.html" as wtf %}
+{% extends "base.html" %}
 
 {% block content %}
-    <h1>{{ _('Sign In') }}</h1>
-    {{ wtf.quick_form(form) }}
-    <p>{{ _('New User?') }} <a href="{{ url_for('auth.register') }}">{{ _('Click to Register!') }}</a></p>
-    <p>
-        {{ _('Forgot Your Password?') }}
-        <a href="{{ url_for('auth.reset_password_request') }}">{{ _('Click to Reset It') }}</a>
-    </p>
-{% endblock %}
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-md-7 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            
+            <div class="card-header bg-primary text-white text-center py-4 border-0">
+                <i class="fa-solid fa-truck-medical fa-3x mb-3 text-warning"></i>
+                <h3 class="mb-0 fw-bold">Đăng nhập hệ thống</h3>
+                <p class="mb-0 mt-1 opacity-75">Bệnh Viện Tony xin chào!</p>
+            </div>
+            
+            <div class="card-body p-4 p-md-5 bg-white">
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary">{{ form.username.label.text }}</label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-primary"></i></span>
+                            {{ form.username(class="form-control bg-light border-start-0", placeholder="Nhập tài khoản của bạn") }}
+                        </div>
+                        {% for error in form.username.errors %}
+                            <span class="text-danger small mt-2 d-block"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-bold text-secondary mb-0">{{ form.password.label.text }}</label>
+                            <a href="{{ url_for('auth.reset_password_request') }}" class="small text-decoration-none text-primary fw-bold">Quên mật khẩu?</a>
+                        </div>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-primary"></i></span>
+                            {{ form.password(class="form-control bg-light border-start-0", placeholder="Nhập mật khẩu") }}
+                        </div>
+                        {% for error in form.password.errors %}
+                            <span class="text-danger small mt-2 d-block"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4 form-check form-switch ms-1">
+                        {{ form.remember_me(class="form-check-input fs-5", id="rememberSwitch") }}
+                        <label class="form-check-label fw-bold text-secondary ms-2 mt-1" for="rememberSwitch">Ghi nhớ phiên đăng nhập</label>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-5">
+                        {{ form.submit(class="btn btn-primary btn-lg rounded-pill fw-bold shadow py-3", value="ĐĂNG NHẬP NGAY") }}
+                    </div>
+                </form>
+            </div>
+            
+            <div class="card-footer bg-light border-0 text-center py-4">
+                <p class="mb-0 text-secondary fs-6">Chưa có tài khoản bệnh nhân? <br>
+                    <a href="{{ url_for('auth.register') }}" class="fw-bold text-primary text-decoration-none fs-5 d-inline-block mt-2"><i class="fa-solid fa-user-plus me-1"></i> Đăng ký tại đây</a>
+                </p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}  

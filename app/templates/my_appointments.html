@@ -1,32 +1,75 @@
 {% extends "base.html" %}
+
 {% block content %}
-    <h3><span class="glyphicon glyphicon-th-list"></span> Danh sách lịch hẹn của tôi</h3>
-    <hr>
-    <table class="table table-bordered table-striped">
-        <tr class="active">
-            <th>Ngày khám</th><th>Giờ khám</th><th>Bác sĩ</th><th>Trạng thái</th><th>Thao tác</th>
-        </tr>
+<div class="container mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h2 class="text-primary mb-0"><i class="fa-solid fa-clipboard-user me-2"></i> Lịch hẹn của tôi</h2>
+        <a href="{{ url_for('main.book_appointment') }}" class="btn btn-outline-primary rounded-pill">
+            <i class="fa-solid fa-plus me-1"></i> Đặt lịch mới
+        </a>
+    </div>
+    
+    <div class="row">
         {% for apt in appointments %}
-        <tr>
-            <td>{{ apt.appointment_date }}</td>
-            <td>{{ apt.appointment_time }}</td>
-            <td>BS. {{ apt.doctor.username }}</td>
-            <td>
-                {% if apt.status == 'Pending' %}<span class="label label-warning">Đang chờ</span>
-                {% elif apt.status == 'Cancelled' %}<span class="label label-danger">Đã hủy</span>
-                {% else %}<span class="label label-success">Đã xác nhận</span>{% endif %}
-            </td>
-            <td>
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100 border-0 border-top border-4 
+                {% if apt.status == 'Confirmed' %}border-success{% elif apt.status == 'Pending' %}border-warning{% else %}border-secondary{% endif %}">
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="fa-solid fa-user-doctor text-primary me-2"></i> BS. {{ apt.doctor.username }}
+                        </h5>
+                        
+                        {% if apt.status == 'Pending' %}
+                            <span class="badge bg-warning text-dark rounded-pill px-2 py-1"><i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác nhận</span>
+                        {% elif apt.status == 'Confirmed' %}
+                            <span class="badge bg-success rounded-pill px-2 py-1"><i class="fa-solid fa-check me-1"></i> Đã xác nhận</span>
+                        {% else %}
+                            <span class="badge bg-secondary rounded-pill px-2 py-1">{{ apt.status }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-light rounded p-2 me-3 text-center" style="width: 60px;">
+                            <span class="d-block text-danger fw-bold fs-5">{{ apt.appointment_date.strftime('%d') if apt.appointment_date else '--' }}</span>
+                            <span class="d-block text-muted small">Th{{ apt.appointment_date.strftime('%m') if apt.appointment_date else '--' }}</span>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-muted"><i class="fa-regular fa-calendar-days me-2"></i>{{ apt.appointment_date }}</p>
+                            <p class="mb-0 fw-bold text-dark"><i class="fa-regular fa-clock me-2 text-muted"></i>{{ apt.appointment_time }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light p-3 rounded-3 mt-3 border">
+                        <small class="text-muted d-block mb-1 fw-bold">Triệu chứng/Ghi chú:</small>
+                        <span class="fst-italic">{{ apt.notes if apt.notes else 'Không có ghi chú' }}</span>
+                    </div>
+                </div>
+                
                 {% if apt.status == 'Pending' %}
-                <form action="{{ url_for('main.cancel_appointment', id=apt.id) }}" method="post">
-                    <button class="btn btn-danger btn-xs">Hủy lịch</button>
-                </form>
+                <div class="card-footer bg-white border-0 text-end pb-3">
+                    <form action="{{ url_for('main.cancel_appointment', id=apt.id) }}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này không?');">
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy lịch
+                        </button>
+                    </form>
+                </div>
                 {% endif %}
-            </td>
-        </tr>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="p-5 bg-white rounded-4 shadow-sm">
+                <i class="fa-regular fa-calendar-xmark fa-4x text-muted mb-3 opacity-50"></i>
+                <h4 class="text-muted fw-bold">Bạn chưa có lịch hẹn nào</h4>
+                <p class="text-secondary">Hãy đặt lịch khám để bác sĩ của chúng tôi có thể chăm sóc sức khỏe cho bạn.</p>
+                <a href="{{ url_for('main.book_appointment') }}" class="btn btn-primary btn-lg mt-3 rounded-pill px-5 fw-bold shadow">
+                    <i class="fa-solid fa-calendar-plus me-2"></i> Đặt lịch ngay
+                </a>
+            </div>
+        </div>
         {% endfor %}
-    </table>
-    {% if not appointments %}
-        <div class="alert alert-warning">Bạn chưa có lịch hẹn nào. <a href="{{ url_for('main.book_appointment') }}">Đặt lịch ngay!</a></div>
-    {% endif %}
-{% endblock %}
+    </div>
+</div>
+{% endblock %}  

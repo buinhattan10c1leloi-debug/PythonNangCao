@@ -1,7 +1,78 @@
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as wtf %}
 
 {% block content %}
-    <h1>{{ _('Register') }}</h1>
-    {{ wtf.quick_form(form) }}
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-md-8 col-lg-6"> <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            
+            <div class="card-header bg-primary text-white text-center py-4 border-0">
+                <i class="fa-solid fa-clipboard-user fa-3x mb-3 text-warning"></i>
+                <h3 class="mb-0 fw-bold">Đăng ký tài khoản</h3>
+                <p class="mb-0 mt-1 opacity-75">Trở thành Bệnh nhân của Bệnh Viện Tony</p>
+            </div>
+            
+            <div class="card-body p-4 p-md-5 bg-white">
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary">{{ form.username.label.text }}</label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-primary"></i></span>
+                            {{ form.username(class="form-control bg-light border-start-0", placeholder="Ví dụ: tony_nguyen") }}
+                        </div>
+                        {% for error in form.username.errors %}
+                            <span class="text-danger small mt-2 d-block"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary">{{ form.email.label.text }}</label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-envelope text-primary"></i></span>
+                            {{ form.email(class="form-control bg-light border-start-0", placeholder="Nhập địa chỉ email của bạn") }}
+                        </div>
+                        {% for error in form.email.errors %}
+                            <span class="text-danger small mt-2 d-block"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <label class="form-label fw-bold text-secondary">{{ form.password.label.text }}</label>
+                            <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-primary"></i></span>
+                                {{ form.password(class="form-control bg-light border-start-0", placeholder="Mật khẩu") }}
+                            </div>
+                            {% for error in form.password.errors %}
+                                <span class="text-danger small mt-2 d-block"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">{{ form.password2.label.text }}</label>
+                            <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-key text-primary"></i></span>
+                                {{ form.password2(class="form-control bg-light border-start-0", placeholder="Nhập lại lần nữa") }}
+                            </div>
+                            {% for error in form.password2.errors %}
+                                <span class="text-danger small mt-2 d-block"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-5">
+                        {{ form.submit(class="btn btn-primary btn-lg rounded-pill fw-bold shadow py-3", value="TẠO TÀI KHOẢN NGAY") }}
+                    </div>
+                </form>
+            </div>
+            
+            <div class="card-footer bg-light border-0 text-center py-4">
+                <p class="mb-0 text-secondary fs-6">Đã có tài khoản rồi? <br>
+                    <a href="{{ url_for('auth.login') }}" class="fw-bold text-primary text-decoration-none fs-5 d-inline-block mt-2"><i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập ngay</a>
+                </p>
+            </div>
+            
+        </div>
+    </div>
+</div>
 {% endblock %}

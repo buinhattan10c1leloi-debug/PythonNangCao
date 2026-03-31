@@ -1,30 +1,33 @@
-    <table class="table table-hover">
-        <tr>
-            <td width="70px">
-                <a href="{{ url_for('main.user', username=post.author.username) }}">
-                    <img src="{{ post.author.avatar(70) }}" />
-                </a>
-            </td>
-            <td>
-                {% set user_link %}
-                    <a class="user_popup" href="{{ url_for('main.user', username=post.author.username) }}">
+<div class="card shadow-sm mb-3 border-0 rounded-4">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-start">
+            <a href="{{ url_for('main.user', username=post.author.username) }}">
+                <img src="{{ post.author.avatar(50) }}" class="rounded-circle shadow-sm me-3 border" alt="Avatar">
+            </a>
+            
+            <div class="w-100">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <a href="{{ url_for('main.user', username=post.author.username) }}" class="text-decoration-none fw-bold fs-5 text-dark">
                         {{ post.author.username }}
+                        {% if post.author.role == 'doctor' %}
+                            <i class="fa-solid fa-circle-check text-success small ms-1" title="Bác sĩ xác thực"></i>
+                        {% endif %}
                     </a>
-                {% endset %}
-                {{ _('%(username)s said %(when)s',
-                    username=user_link, when=moment(post.timestamp).fromNow()) }}
-                <br>
-                <span id="post{{ post.id }}">{{ post.body }}</span>
+                    <span class="badge bg-light text-muted fw-normal rounded-pill border">
+                        <i class="fa-regular fa-clock me-1"></i> {{ moment(post.timestamp).fromNow() }}
+                    </span>
+                </div>
+                
+                <p class="mb-0 mt-2 text-secondary fs-6 lh-base">{{ post.body }}</p>
+                
                 {% if post.language and post.language != g.locale %}
-                <br><br>
-                <span id="translation{{ post.id }}">
-                    <a href="javascript:translate(
-                                'post{{ post.id }}',
-                                'translation{{ post.id }}',
-                                '{{ post.language }}',
-                                '{{ g.locale }}');">{{ _('Translate') }}</a>
-                </span>
+                <div class="mt-3">
+                    <a href="#" class="text-decoration-none text-primary bg-light px-2 py-1 rounded small">
+                        <i class="fa-solid fa-language me-1"></i> Dịch bài viết này
+                    </a>
+                </div>
                 {% endif %}
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+    </div>
+</div>

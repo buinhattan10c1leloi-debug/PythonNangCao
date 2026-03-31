@@ -1,43 +1,157 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="jumbotron text-center" style="background-color: #e6f2ff;">
-        <h1>Chào mừng đến với Bệnh Viện Tony</h1>
-        <p>Sức khỏe của bạn là ưu tiên hàng đầu của chúng tôi. Đội ngũ bác sĩ tận tâm, trang thiết bị hiện đại.</p>
-        {% if current_user.is_anonymous %}
-            <p>
-                <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}" role="button">Đăng ký ngay</a>
-                <a class="btn btn-default btn-lg" href="{{ url_for('auth.login') }}" role="button">Đăng nhập</a>
-            </p>
-        {% else %}
-            <p><a class="btn btn-success btn-lg" href="{{ url_for('main.book_appointment') }}" role="button">Đặt lịch khám ngay</a></p>
-        {% endif %}
-    </div>
+<style>
+    .ticker-container {
+        width: 100%;
+        overflow: hidden;
+        background-color: #fff3cd; /* Màu vàng nhạt cảnh báo */
+        border-radius: 50rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        padding: 6px 15px;
+        margin-bottom: 30px;
+    }
+    .ticker-text {
+        white-space: nowrap;
+        animation: ticker 25s linear infinite;
+        padding-left: 100%; /* Bắt đầu chạy từ mép phải màn hình */
+    }
+    .ticker-text:hover {
+        animation-play-state: paused; /* Dừng lại khi người dùng trỏ chuột vào để đọc */
+        cursor: pointer;
+    }
+    @keyframes ticker {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+    }
+</style>
 
-    <div class="row">
-        <div class="col-md-4">
-            <div class="thumbnail">
-                <div class="caption text-center">
-                    <h3><span class="glyphicon glyphicon-heart"></span> Nội khoa</h3>
-                    <p>Khám và điều trị các bệnh lý về tim mạch, hô hấp, tiêu hóa...</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="thumbnail">
-                <div class="caption text-center">
-                    <h3><span class="glyphicon glyphicon-eye-open"></span> Nhãn khoa</h3>
-                    <p>Chăm sóc đôi mắt của bạn với công nghệ đo khám tiên tiến nhất.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="thumbnail">
-                <div class="caption text-center">
-                    <h3><span class="glyphicon glyphicon-user"></span> Nhi khoa</h3>
-                    <p>Môi trường khám chữa bệnh thân thiện, nhẹ nhàng cho bé yêu.</p>
-                </div>
-            </div>
+<div class="ticker-container border border-warning">
+    <span class="badge bg-danger rounded-pill px-3 py-2 z-1 shadow-sm fs-6">
+        <i class="fa-solid fa-bullhorn mb-0 fade-in-out me-1"></i> TIN NÓNG
+    </span>
+    <div class="flex-grow-1 overflow-hidden ms-2">
+        <div class="ticker-text fw-bold text-dark fs-6">
+            Chào mừng bạn đến với Bệnh Viện Tony! Hệ thống đặt lịch khám bệnh trực tuyến đã chính thức hoạt động. 
+            <span class="text-danger ms-4 me-4"><i class="fa-solid fa-gift"></i> ƯU ĐÃI: GIẢM 20% PHÍ KHÁM BỆNH</span> cho 100 bệnh nhân đầu tiên đặt lịch qua website trong tháng này!
+            <span class="text-primary"><i class="fa-solid fa-phone ms-4"></i> Hotline cấp cứu 24/7: 1900-XXXX</span>
         </div>
     </div>
+</div>
+
+<div class="row mb-5 mt-2">
+    <div class="col-12">
+        <div class="p-5 text-center bg-primary text-white rounded-4 shadow-lg position-relative overflow-hidden">
+            <i class="fa-solid fa-staff-snake fa-10x position-absolute opacity-10" style="right: -50px; bottom: -50px;"></i>
+            
+            <i class="fa-solid fa-house-medical fa-4x mb-3"></i>
+            <h1 class="display-5 fw-bold mb-3">Chào mừng đến với Bệnh Viện Tony</h1>
+            <p class="lead fs-4 mb-4">Hệ thống chăm sóc sức khỏe toàn diện, hiện đại và tận tâm.</p>
+            
+            {% if current_user.is_anonymous %}
+                <hr class="my-4 bg-light w-50 mx-auto opacity-50">
+                <p class="fs-5 mb-4">Hãy đăng nhập hoặc đăng ký để trải nghiệm dịch vụ đặt lịch khám trực tuyến.</p>
+                <a class="btn btn-light btn-lg rounded-pill px-4 me-3 fw-bold shadow-sm" href="{{ url_for('auth.login') }}">
+                    <i class="fa-solid fa-right-to-bracket text-primary me-1"></i> Đăng nhập
+                </a>
+                <a class="btn btn-outline-light btn-lg rounded-pill px-4 fw-bold" href="{{ url_for('auth.register') }}">
+                    <i class="fa-solid fa-user-plus me-1"></i> Đăng ký
+                </a>
+            {% else %}
+                <hr class="my-4 bg-light w-50 mx-auto opacity-50">
+                <h4 class="mb-4 fw-light">Xin chào, <span class="fw-bold">{{ current_user.username }}</span>! Chúc bạn một ngày tốt lành.</h4>
+                
+                {% if current_user.role == 'doctor' %}
+                    <a class="btn btn-warning btn-lg rounded-pill px-5 fw-bold shadow-sm text-dark" href="{{ url_for('main.doctor_dashboard') }}">
+                        <i class="fa-solid fa-stethoscope me-2"></i> Bảng điều khiển Bác sĩ
+                    </a>
+                {% else %}
+                    <a class="btn btn-light btn-lg rounded-pill px-4 me-3 fw-bold shadow-sm text-primary" href="{{ url_for('main.book_appointment') }}">
+                        <i class="fa-solid fa-calendar-plus me-1"></i> Đặt lịch khám ngay
+                    </a>
+                    <a class="btn btn-outline-light btn-lg rounded-pill px-4 fw-bold" href="{{ url_for('main.my_appointments') }}">
+                        <i class="fa-solid fa-list-check me-1"></i> Xem lịch sử
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+            <h3 class="text-secondary mb-0">
+                <i class="fa-solid fa-newspaper text-primary me-2"></i> Bản tin sức khỏe trực tuyến
+            </h3>
+        </div>
+        
+        {% if form %}
+        <div class="card shadow-sm mb-4 border-0 bg-white rounded-4">
+            <div class="card-body p-4">
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">{{ form.post.label }}</label>
+                        {{ form.post(class="form-control bg-light border-0", rows="2", placeholder="Bạn đang nghĩ gì, hoặc có câu hỏi nào về sức khỏe cần giải đáp?") }}
+                        {% for error in form.post.errors %}
+                        <span class="text-danger small mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="text-end">
+                        {{ form.submit(class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="bg-light p-3 rounded-4 shadow-sm mb-4">
+            <div id="newsCarousel" class="carousel carousel-dark slide" data-bs-ride="carousel" data-bs-interval="4000">
+                <div class="carousel-inner px-5 py-2">
+                    {% for post in posts %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        {% include '_post.html' %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-solid fa-box-open fa-3x mb-3 opacity-50"></i>
+                        <h5>Chưa có bản tin nào</h5>
+                        <p>Hãy là người đầu tiên đặt câu hỏi hoặc chia sẻ thông tin sức khỏe nhé!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if posts|length > 0 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev" style="width: 50px; justify-content: start;">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Trước</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next" style="width: 50px; justify-content: end;">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Sau</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <nav aria-label="Page navigation" class="mt-4 mb-5">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if not prev_url %}disabled{% endif %}">
+                    <a class="page-link rounded-pill px-4 me-2 shadow-sm" href="{{ prev_url or '#' }}">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Trang trước
+                    </a>
+                </li>
+                <li class="page-item {% if not next_url %}disabled{% endif %}">
+                    <a class="page-link rounded-pill px-4 shadow-sm" href="{{ next_url or '#' }}">
+                        Trang sau <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+    </div>
+</div>
 {% endblock %}

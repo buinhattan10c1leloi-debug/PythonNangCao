@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-header bg-success text-white py-3 border-0">
+                <h4 class="mb-0 fw-bold"><i class="fa-solid fa-calendar-plus me-2"></i> Đăng ký khám trực tiếp (Offline)</h4>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tên bệnh nhân</label>
+                            {{ form.patient_name(class="form-control form-control-lg bg-light", placeholder="Nguyễn Văn A") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Số điện thoại</label>
+                            {{ form.phone(class="form-control form-control-lg bg-light", placeholder="0905xxxxxx") }}
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ngày hẹn</label>
+                            {{ form.date(class="form-control form-control-lg bg-light", type="date") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Khung giờ</label>
+                            {{ form.time(class="form-select form-select-lg bg-light") }}
+                        </div>
+                    </div>
+                    <div class="mb-4 mt-3">
+                        <label class="form-label fw-bold">Ghi chú triệu chứng ban đầu</label>
+                        {{ form.notes(class="form-control bg-light", rows="3") }}
+                    </div>
+                    <div class="d-grid mt-5">
+                        {{ form.submit(class="btn btn-success btn-lg fw-bold rounded-pill py-3", value="XÁC NHẬN ĐĂNG KÝ") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

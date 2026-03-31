@@ -4,9 +4,11 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 import sqlalchemy as sa
 from app import db
+# BỔ SUNG: Thêm OfflineAppointmentForm và PrescriptionForm vào danh sách import
 from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, \
-    MessageForm, AppointmentForm, MedicalRecordForm
-from app.models import User, Post, Message, Notification, Appointment, MedicalRecord
+    MessageForm, AppointmentForm, MedicalRecordForm, OfflineAppointmentForm, PrescriptionForm
+# THÊM Medicine vào danh sách models
+from app.models import User, Post, Message, Notification, Appointment, MedicalRecord, Medicine
 from app.translate import translate
 from app.main import bp
 
@@ -22,6 +24,7 @@ def before_request():
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
+@login_required 
 def index():
     return render_template('index.html', title=_('Trang chủ'))
 
@@ -194,17 +197,140 @@ def examine(appointment_id):
         flash(_('Không tìm thấy lịch hẹn.'))
         return redirect(url_for('main.doctor_dashboard'))
 
-    form = MedicalRecordForm()
+    # Lấy danh sách thuốc để bác sĩ chọn từ mục lục bên trái trang khám
+    medicines = db.session.scalars(sa.select(Medicine).order_by(Medicine.name.asc())).all()
+
+    # Sử dụng PrescriptionForm để kê đơn thuốc chuyên sâu
+    form = PrescriptionForm()
     if form.validate_on_submit():
         record = MedicalRecord(
             diagnosis=form.diagnosis.data,
-            prescription=form.prescription.data,
+            prescription=form.medicine_details.data, 
             doctor_advice=form.doctor_advice.data,
             appointment_id=apt.id
         )
         apt.status = 'Completed'
         db.session.add(record)
         db.session.commit()
-        flash(_('Đã hoàn tất khám bệnh.'))
+        flash(_('Đã hoàn tất khám bệnh và gửi đơn thuốc sang Quầy thuốc.'))
         return redirect(url_for('main.doctor_dashboard'))
-    return render_template('examine.html', title=_('Khám bệnh'), form=form, apt=apt)
+    return render_template('examine.html', title=_('Khám bệnh'), form=form, apt=apt, medicines=medicines)
+
+@bp.route('/news', methods=['GET', 'POST'])
+@login_required 
+def news():
+    form = PostForm()
+    if current_user.is_authenticated and form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash(_('Bài viết của bạn đã được đăng tải thành công!'), 'success')
+        return redirect(url_for('main.news'))
+    
+    page = request.args.get('page', 1, type=int)
+    posts = db.paginate(current_user.following_posts() if current_user.is_authenticated else Post.query.order_by(Post.timestamp.desc()),
+                        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+    
+    next_url = url_for('main.news', page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('main.news', page=posts.prev_num) if posts.has_prev else None
+    
+    return render_template('news.html', title=_('Bản tin Cộng đồng'), form=form,
+                           posts=posts.items, next_url=next_url, prev_url=prev_url)
+
+# --- KHU VỰC DÀNH RIÊNG CHO ADMIN ---
+
+@bp.route('/admin/dashboard')
+@login_required
+def admin_dashboard():
+    if current_user.role != 'admin':
+        flash('Bạn không có quyền truy cập khu vực Quản trị!', 'error')
+        return redirect(url_for('main.index'))
+    
+    patients = db.session.scalars(sa.select(User).where(User.role == 'patient')).all()
+    doctors = db.session.scalars(sa.select(User).where(User.role == 'doctor')).all()
+    
+    return render_template('admin_dashboard.html', title='Quản trị Hệ thống', patients=patients, doctors=doctors)
+
+@bp.route('/admin/create_doctor', methods=['POST'])
+@login_required
+def admin_create_doctor():
+    if current_user.role != 'admin': return redirect(url_for('main.index'))
+    
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    
+    if db.session.scalar(sa.select(User).where(User.username == username)):
+        flash('Tên đăng nhập đã tồn tại!', 'error')
+    elif db.session.scalar(sa.select(User).where(User.email == email)):
+        flash('Email đã được sử dụng!', 'error')
+    else:
+        new_doc = User(username=username, email=email, role='doctor')
+        new_doc.set_password(password)
+        db.session.add(new_doc)
+        db.session.commit()
+        flash(f'Đã tạo tài khoản Bác sĩ: {username}', 'success')
+        
+    return redirect(url_for('main.admin_dashboard'))
+
+@bp.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    if current_user.role != 'admin': return redirect(url_for('main.index'))
+    
+    user = db.session.get(User, user_id)
+    if user and user.role != 'admin':
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'Đã xóa tài khoản: {user.username}', 'success')
+        
+    return redirect(url_for('main.admin_dashboard'))
+
+@bp.route('/admin/change_password/<int:user_id>', methods=['POST'])
+@login_required
+def admin_change_password(user_id):
+    if current_user.role != 'admin': return redirect(url_for('main.index'))
+    
+    user = db.session.get(User, user_id)
+    new_password = request.form.get('new_password')
+    
+    if user and new_password:
+        user.set_password(new_password)
+        db.session.commit()
+        flash(f'Đã cấp lại mật khẩu mới cho: {user.username}', 'success')
+        
+    return redirect(url_for('main.admin_dashboard'))
+
+# --- TÍNH NĂNG NÂNG CAO CHO BÁC SĨ & PHÒNG THUỐC ---
+
+@bp.route('/doctor/create_offline', methods=['GET', 'POST'])
+@login_required
+def create_offline():
+    if current_user.role != 'doctor':
+        flash('Chỉ bác sĩ mới có quyền tạo lịch trực tiếp.', 'error')
+        return redirect(url_for('main.index'))
+    
+    form = OfflineAppointmentForm()
+    
+    if form.validate_on_submit():
+        time_obj = datetime.strptime(form.time.data, '%H:%M').time()
+        apt = Appointment(
+            appointment_date=form.date.data,
+            appointment_time=time_obj,
+            notes=f"[KHÁCH TRỰC TIẾP] Tên: {form.patient_name.data} - SĐT: {form.phone.data}\nTriệu chứng: {form.notes.data}",
+            doctor_id=current_user.id,
+            status='Confirmed' 
+        )
+        db.session.add(apt)
+        db.session.commit()
+        flash(f'Đã tạo lịch khám trực tiếp cho bệnh nhân {form.patient_name.data}', 'success')
+        return redirect(url_for('main.doctor_dashboard'))
+        
+    return render_template('create_offline.html', title='Tạo lịch trực tiếp', form=form)
+
+@bp.route('/pharmacy/dashboard')
+@login_required
+def pharmacy_dashboard():
+    query = sa.select(MedicalRecord).order_by(MedicalRecord.timestamp.desc())
+    records = db.session.scalars(query).all()
+    return render_template('pharmacy_dashboard.html', title='Quầy thuốc Tony', records=records)

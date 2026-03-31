@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h2 class="text-success fw-bold m-0"><i class="fa-solid fa-pills me-2"></i> QUẦY THUỐC TONY HOSPITAL</h2>
+        <span class="badge bg-light text-success border border-success p-2 fs-6">Trạng thái: Đang hoạt động</span>
+    </div>
+
+    <div class="row">
+        {% for record in records %}
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden border-top border-4 border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <h5 class="fw-bold text-dark mb-0">
+                            {{ record.appointment.patient.username if record.appointment.patient else "Bệnh nhân Offline" }}
+                        </h5>
+                        <small class="text-muted">{{ moment(record.timestamp).fromNow() }}</small>
+                    </div>
+                    
+                    <div class="bg-light p-3 rounded-3 mb-3 border">
+                        <div class="small text-uppercase fw-bold text-secondary mb-1">Chẩn đoán:</div>
+                        <div class="text-primary fw-bold mb-2">{{ record.diagnosis }}</div>
+                        
+                        <div class="small text-uppercase fw-bold text-secondary mb-1">Đơn thuốc:</div>
+                        <div class="bg-white p-2 rounded border text-success fw-bold shadow-sm" style="white-space: pre-line;">
+                            {{ record.prescription }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="small text-muted">BS: <b>{{ record.appointment.doctor.username }}</b></div>
+                        <button class="btn btn-success btn-sm rounded-pill px-3 fw-bold shadow-sm" onclick="this.innerHTML='<i class=\'fa-solid fa-check\'></i> Đã thanh toán'; this.className='btn btn-light btn-sm text-success fw-bold rounded-pill px-3';">
+                            Bốc thuốc & Thu tiền
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-box-open fa-4x text-muted opacity-25 mb-3"></i>
+            <h5 class="text-secondary">Hiện tại chưa có đơn thuốc mới nào từ Bác sĩ.</h5>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

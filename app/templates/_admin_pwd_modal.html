@@ -1,0 +1,23 @@
+<div class="modal fade" id="pwdModal{{ u.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-info"><i class="fa-solid fa-key"></i> Đổi mật khẩu cho: {{ u.username }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('main.admin_change_password', user_id=u.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Nhập mật khẩu mới</label>
+                        <input type="text" name="new_password" class="form-control" required minlength="6" placeholder="Nhập ít nhất 6 ký tự">
+                        <small class="text-muted mt-2 d-block">Lưu ý: Hành động này sẽ ghi đè mật khẩu cũ của người dùng.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-info text-white">Xác nhận Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -398,6 +398,18 @@ class MedicalRecord(db.Model):
         sa.ForeignKey(Appointment.id), unique=True)
     
     appointment: so.Mapped[Appointment] = so.relationship(back_populates='medical_record')
+    
 
     def __repr__(self):
         return f'<MedicalRecord for Appointment {self.appointment_id}>'
+
+# --- THÊM MODEL MEDICINE CHO QUẦY THUỐC ---
+
+class Medicine(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
+    unit: so.Mapped[str] = so.mapped_column(sa.String(20)) # Ví dụ: Viên, Gói, Chai
+    price: so.Mapped[float] = so.mapped_column(sa.Float, default=0.0)
+
+    def __repr__(self):
+        return f'<Medicine {self.name}>'

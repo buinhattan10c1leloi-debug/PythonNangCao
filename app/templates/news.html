@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <h2 class="text-primary fw-bold mb-0">
+                    <i class="fa-solid fa-newspaper me-2"></i> Diễn đàn Sức khỏe
+                </h2>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+            <div class="card shadow-sm mb-5 border-0 bg-white rounded-4">
+                <div class="card-body p-4">
+                    <form action="" method="post">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="{{ current_user.avatar(40) }}" class="rounded-circle me-2 border">
+                                <strong class="text-dark">{{ current_user.username }}</strong>
+                            </div>
+                            {{ form.post(class="form-control bg-light border-0", rows="3", placeholder="Bạn có câu hỏi sức khỏe hoặc muốn chia sẻ điều gì hôm nay?") }}
+                            {% for error in form.post.errors %}
+                            <span class="text-danger small mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="text-end">
+                            {{ form.submit(class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm", value="Đăng bài viết") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info rounded-4 shadow-sm mb-5 text-center p-4">
+                <i class="fa-solid fa-circle-info fa-2x mb-3 text-info"></i>
+                <h5 class="fw-bold">Tham gia thảo luận</h5>
+                <p class="mb-0 text-secondary">Vui lòng <a href="{{ url_for('auth.login') }}" class="fw-bold text-decoration-none">Đăng nhập</a> để đặt câu hỏi hoặc chia sẻ kiến thức với các Bác sĩ và bệnh nhân khác.</p>
+            </div>
+            {% endif %}
+
+            <div class="posts-list">
+                {% for post in posts %}
+                    {% include '_post.html' %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-regular fa-comments fa-4x mb-3 opacity-25"></i>
+                        <h5>Chưa có bài thảo luận nào</h5>
+                        <p>Hãy là người đầu tiên đặt câu hỏi nhé!</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <nav aria-label="Page navigation" class="mt-4 mb-5">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not prev_url %}disabled{% endif %}">
+                        <a class="page-link rounded-pill px-4 me-2 shadow-sm" href="{{ prev_url or '#' }}">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Mới hơn
+                        </a>
+                    </li>
+                    <li class="page-item {% if not next_url %}disabled{% endif %}">
+                        <a class="page-link rounded-pill px-4 shadow-sm" href="{{ next_url or '#' }}">
+                            Cũ hơn <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

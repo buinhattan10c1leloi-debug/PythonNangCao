@@ -1,56 +1,57 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <span class="glyphicon glyphicon-plus"></span> 
-                        ĐĂNG KÝ LỊCH KHÁM BỆNH
-                    </h3>
-                </div>
-                <div class="panel-body">
-                    <p>Chào <b>{{ current_user.username }}</b>, vui lòng chọn thông tin khám:</p>
-                    <hr>
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white text-center py-4 border-0">
+                <h3 class="mb-0 fw-bold">
+                    <i class="fa-solid fa-calendar-check fa-lg me-2"></i> Đặt lịch khám bệnh
+                </h3>
+                <p class="mb-0 mt-2 opacity-75">Vui lòng điền thông tin để chúng tôi sắp xếp lịch tốt nhất</p>
+            </div>
+            
+            <div class="card-body p-4 p-md-5 bg-white">
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
                     
-                    <form action="" method="post" class="form" role="form">
-                        {{ form.hidden_tag() }}
-                        
-                        <div class="form-group">
-                            <label><span class="glyphicon glyphicon-user"></span> Bác sĩ phụ trách:</label>
-                            {{ form.doctor(class="form-control") }}
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary"><i class="fa-solid fa-user-doctor text-primary me-2"></i>{{ form.doctor.label }}</label>
+                        {{ form.doctor(class="form-select form-select-lg bg-light") }}
+                        {% for error in form.doctor.errors %}
+                            <span class="text-danger small mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label><span class="glyphicon glyphicon-calendar"></span> Ngày khám:</label>
-                                    {{ form.date(class="form-control", type="date") }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label><span class="glyphicon glyphicon-time"></span> Khung giờ:</label>
-                                    {{ form.time(class="form-control") }}
-                                </div>
-                            </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-bold text-secondary"><i class="fa-regular fa-calendar-days text-primary me-2"></i>{{ form.date.label }}</label>
+                            {{ form.date(class="form-control form-control-lg bg-light", type="date") }}
+                            {% for error in form.date.errors %}
+                                <span class="text-danger small mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                            {% endfor %}
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary"><i class="fa-regular fa-clock text-primary me-2"></i>{{ form.time.label }}</label>
+                            {{ form.time(class="form-select form-select-lg bg-light") }}
+                            {% for error in form.time.errors %}
+                                <span class="text-danger small mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label><span class="glyphicon glyphicon-pencil"></span> Triệu chứng sơ bộ:</label>
-                            {{ form.notes(class="form-control", rows="3", placeholder="Nhập triệu chứng tại đây...") }}
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary"><i class="fa-solid fa-notes-medical text-primary me-2"></i>{{ form.notes.label }}</label>
+                        {{ form.notes(class="form-control bg-light", rows="4", placeholder="Ví dụ: Đau đầu, sốt cao liên tục 2 ngày nay...") }}
+                        {% for error in form.notes.errors %}
+                            <span class="text-danger small mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                    </div>
 
-                        <div class="form-group">
-                            {{ form.submit(class="btn btn-primary btn-block") }}
-                        </div>
-                    </form>
-                </div>
-                <div class="panel-footer text-muted">
-                    <small>* Lưu ý: Sau khi đăng ký, vui lòng kiểm tra trạng thái tại "Lịch hẹn của tôi".</small>
-                </div>
+                    <div class="d-grid gap-2 mt-5">
+                        {{ form.submit(class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm py-3") }}
+                    </div>
+                </form>
             </div>
         </div>
     </div>

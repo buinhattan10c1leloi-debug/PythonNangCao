@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body { background-color: #1a1d20 !important; } /* Nền đen nhám */
+    .main-container {
+        background-color: #212529 !important;
+        color: #f8f9fa !important;
+        border-top: 5px solid #dc3545 !important; /* Viền đỏ quyền lực */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .admin-title { color: #ffc107 !important; } /* Chữ vàng */
+    .table-dark-custom { color: #dee2e6; }
+    .table-dark-custom th { background-color: #343a40; color: #fff; border-color: #495057; }
+    .table-dark-custom td { border-color: #495057; vertical-align: middle;}
+    .nav-tabs .nav-link { color: #adb5bd; border: none; }
+    .nav-tabs .nav-link.active { background-color: #343a40; color: #ffc107; border-radius: 5px 5px 0 0; font-weight: bold;}
+    .modal-content { background-color: #2b3035; color: white; } /* Modal màu tối */
+    .modal-header { border-bottom: 1px solid #495057; }
+    .modal-footer { border-top: 1px solid #495057; }
+    .form-control { background-color: #212529; color: white; border-color: #495057; }
+    .form-control:focus { background-color: #2b3035; color: white; }
+</style>
+
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
+        <h2 class="admin-title fw-bold m-0"><i class="fa-solid fa-user-shield me-2"></i> TRUNG TÂM QUẢN TRỊ HỆ THỐNG</h2>
+        <button class="btn btn-warning fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createDoctorModal">
+            <i class="fa-solid fa-user-doctor me-1"></i> Cấp tài khoản Bác sĩ
+        </button>
+    </div>
+
+    <ul class="nav nav-tabs mb-4 border-secondary" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="patient-tab" data-bs-toggle="tab" data-bs-target="#patients" type="button" role="tab">
+                <i class="fa-solid fa-hospital-user me-1"></i> Quản lý Bệnh nhân ({{ patients|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="doctor-tab" data-bs-toggle="tab" data-bs-target="#doctors" type="button" role="tab">
+                <i class="fa-solid fa-stethoscope me-1"></i> Danh sách Bác sĩ ({{ doctors|length }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabsContent">
+        <div class="tab-pane fade show active" id="patients" role="tabpanel">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body p-0">
+                    <table class="table table-hover table-dark-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên Bệnh nhân</th>
+                                <th>Email</th>
+                                <th>Lần cuối đăng nhập</th>
+                                <th class="text-end">Hành động quản trị</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in patients %}
+                            <tr>
+                                <td>{{ u.id }}</td>
+                                <td class="fw-bold"><img src="{{ u.avatar(30) }}" class="rounded-circle me-2">{{ u.username }}</td>
+                                <td>{{ u.email }}</td>
+                                <td>{{ moment(u.last_seen).format('L LT') if u.last_seen else 'Chưa rõ' }}</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pwdModal{{ u.id }}"><i class="fa-solid fa-key"></i> Đổi Pass</button>
+                                    <form action="{{ url_for('main.admin_delete_user', user_id=u.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa vĩnh viễn bệnh nhân này?');">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i> Xóa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% include '_admin_pwd_modal.html' %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="doctors" role="tabpanel">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body p-0">
+                    <table class="table table-hover table-dark-custom mb-0">
+                        <thead>
+                            <tr class="table-warning text-dark">
+                                <th>ID</th>
+                                <th>Tên Bác sĩ</th>
+                                <th>Email</th>
+                                <th class="text-end">Hành động quản trị</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in doctors %}
+                            <tr>
+                                <td>{{ u.id }}</td>
+                                <td class="fw-bold text-warning"><img src="{{ u.avatar(30) }}" class="rounded-circle me-2">{{ u.username }}</td>
+                                <td>{{ u.email }}</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pwdModal{{ u.id }}"><i class="fa-solid fa-key"></i> Đổi Pass</button>
+                                    <form action="{{ url_for('main.admin_delete_user', user_id=u.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Thu hồi quyền và xóa bác sĩ này?');">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-user-xmark"></i> Xóa Bác sĩ</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% include '_admin_pwd_modal.html' %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createDoctorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg border-warning">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus"></i> Cấp tài khoản Bác sĩ mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('main.admin_create_doctor') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-warning">Tên đăng nhập</label>
+                        <input type="text" name="username" class="form-control" required placeholder="Ví dụ: bs_nguyenvan_a">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-warning">Email liên hệ</label>
+                        <input type="email" name="email" class="form-control" required placeholder="bs_a@tonyhospital.vn">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-warning">Mật khẩu cấp phát</label>
+                        <input type="password" name="password" class="form-control" required minlength="6">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning fw-bold text-dark"><i class="fa-solid fa-check"></i> Tạo tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
