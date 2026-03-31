@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if title %}
+    <title>{{ title }} - Bệnh Viện Tony</title>
+    {% else %}
+    <title>Hệ thống Quản lý Bệnh Viện Tony</title>
+    {% endif %}
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    
+    <style>
+        /* Tùy chỉnh màu xanh y tế (Medical Blue) */
+        .navbar-hospital {
+            background-color: #004d99; /* Màu xanh đậm tin cậy */
+            border-color: #003366;
+        }
+        .navbar-hospital .navbar-brand, 
+        .navbar-hospital .navbar-nav > li > a {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        .navbar-hospital .navbar-nav > li > a:hover {
+            background-color: #003366;
+            border-radius: 4px;
+        }
+        .navbar-hospital .navbar-toggle .icon-bar {
+            background-color: white;
+        }
+
+        /* Định dạng chung */
+        body { 
+            padding-top: 80px; 
+            background-color: #f4f7f6; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            min-height: 500px;
+        }
+        .footer { 
+            margin-top: 50px; 
+            padding: 20px; 
+            text-align: center; 
+            color: #666; 
+            font-size: 0.9em;
+        }
+        .label-role {
+            margin-left: 10px;
+            font-size: 0.7em;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-hospital navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-nav">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                    <span class="glyphicon glyphicon-plus-sign"></span> BỆNH VIỆN TONY
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="main-nav">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'doctor' %}
+                            <li class="active"><a href="{{ url_for('main.doctor_dashboard') }}">
+                                <span class="glyphicon glyphicon-briefcase"></span> Lịch khám sắp tới
+                            </a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('main.book_appointment') }}">
+                                <span class="glyphicon glyphicon-calendar"></span> Đặt lịch khám
+                            </a></li>
+                            <li><a href="{{ url_for('main.my_appointments') }}">
+                                <span class="glyphicon glyphicon-list-alt"></span> Lịch hẹn của tôi
+                            </a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_anonymous %}
+                        <li><a href="{{ url_for('auth.login') }}">Đăng nhập</a></li>
+                        <li><a href="{{ url_for('auth.register') }}">Đăng ký</a></li>
+                    {% else %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                                <span class="glyphicon glyphicon-user"></span> {{ current_user.username }}
+                                <span class="label label-info label-role">{{ 'Bác sĩ' if current_user.role == 'doctor' else 'Bệnh nhân' }}</span>
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('main.user', username=current_user.username) }}">Hồ sơ cá nhân</a></li>
+                                <li><a href="{{ url_for('main.edit_profile') }}">Chỉnh sửa thông tin</a></li>
+                                <li class="divider"></li>
+                                <li><a href="{{ url_for('auth.logout') }}">Đăng xuất</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-info alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <span class="glyphicon glyphicon-info-sign"></span> {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# ĐÂY LÀ NƠI CÁC TRANG CON ĐỔ VÀO #}
+        {% block content %}{% endblock %}
+    </div>
+
+    <div class="footer container">
+        <hr>
+        <p><b>Hệ thống Quản lý Y tế Tony</b> - Phát triển bởi Nhật Tân &copy; 2026</p>
+        <p>Hỗ trợ kỹ thuật: 1900-XXXX | Email: support@tonyhospital.vn</p>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    {% if moment %}
+        {{ moment.include_moment() }}
+        {{ moment.lang('vi') }}
+    {% endif %}
+</body>
+</html>

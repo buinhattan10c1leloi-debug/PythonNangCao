@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="jumbotron text-center" style="background-color: #e6f2ff;">
+        <h1>Chào mừng đến với Bệnh Viện Tony</h1>
+        <p>Sức khỏe của bạn là ưu tiên hàng đầu của chúng tôi. Đội ngũ bác sĩ tận tâm, trang thiết bị hiện đại.</p>
+        {% if current_user.is_anonymous %}
+            <p>
+                <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}" role="button">Đăng ký ngay</a>
+                <a class="btn btn-default btn-lg" href="{{ url_for('auth.login') }}" role="button">Đăng nhập</a>
+            </p>
+        {% else %}
+            <p><a class="btn btn-success btn-lg" href="{{ url_for('main.book_appointment') }}" role="button">Đặt lịch khám ngay</a></p>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <div class="caption text-center">
+                    <h3><span class="glyphicon glyphicon-heart"></span> Nội khoa</h3>
+                    <p>Khám và điều trị các bệnh lý về tim mạch, hô hấp, tiêu hóa...</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <div class="caption text-center">
+                    <h3><span class="glyphicon glyphicon-eye-open"></span> Nhãn khoa</h3>
+                    <p>Chăm sóc đôi mắt của bạn với công nghệ đo khám tiên tiến nhất.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <div class="caption text-center">
+                    <h3><span class="glyphicon glyphicon-user"></span> Nhi khoa</h3>
+                    <p>Môi trường khám chữa bệnh thân thiện, nhẹ nhàng cho bé yêu.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

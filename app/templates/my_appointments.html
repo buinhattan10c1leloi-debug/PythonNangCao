@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3><span class="glyphicon glyphicon-th-list"></span> Danh sách lịch hẹn của tôi</h3>
+    <hr>
+    <table class="table table-bordered table-striped">
+        <tr class="active">
+            <th>Ngày khám</th><th>Giờ khám</th><th>Bác sĩ</th><th>Trạng thái</th><th>Thao tác</th>
+        </tr>
+        {% for apt in appointments %}
+        <tr>
+            <td>{{ apt.appointment_date }}</td>
+            <td>{{ apt.appointment_time }}</td>
+            <td>BS. {{ apt.doctor.username }}</td>
+            <td>
+                {% if apt.status == 'Pending' %}<span class="label label-warning">Đang chờ</span>
+                {% elif apt.status == 'Cancelled' %}<span class="label label-danger">Đã hủy</span>
+                {% else %}<span class="label label-success">Đã xác nhận</span>{% endif %}
+            </td>
+            <td>
+                {% if apt.status == 'Pending' %}
+                <form action="{{ url_for('main.cancel_appointment', id=apt.id) }}" method="post">
+                    <button class="btn btn-danger btn-xs">Hủy lịch</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% if not appointments %}
+        <div class="alert alert-warning">Bạn chưa có lịch hẹn nào. <a href="{{ url_for('main.book_appointment') }}">Đặt lịch ngay!</a></div>
+    {% endif %}
+{% endblock %}
