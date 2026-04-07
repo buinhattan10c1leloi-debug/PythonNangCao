@@ -4,6 +4,7 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 import sqlalchemy as sa
 from app import db
+
 # Import đầy đủ các Form cần thiết
 from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, \
     MessageForm, AppointmentForm, MedicalRecordForm, OfflineAppointmentForm, PrescriptionForm
@@ -11,6 +12,16 @@ from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, \
 from app.models import User, Post, Message, Notification, Appointment, MedicalRecord, Medicine
 from app.translate import translate
 from app.main import bp
+
+# ====================================================================
+# TÍCH HỢP AI GEMINI TẠI ĐÂY
+# ====================================================================
+import google.generativeai as genai
+
+# Tân nhớ điền API Key thực tế lấy từ Google AI Studio vào đây nhé:
+GOOGLE_API_KEY = "ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY"
+genai.configure(api_key=GOOGLE_API_KEY)
+ai_model = genai.GenerativeModel('gemini-1.5-flash')
 
 
 @bp.before_app_request
@@ -154,6 +165,31 @@ def medical_history():
     records = db.session.scalars(query).all()
     return render_template('medical_history.html', title=_('Lịch sử khám bệnh'), records=records)
 
+# --------------------------------------------------------------------
+# ROUTE TRỢ LÝ AI TƯ VẤN SỨC KHỎE
+# --------------------------------------------------------------------
+@bp.route('/ai_consult', methods=['GET', 'POST'])
+@login_required
+def ai_consult():
+    ai_response = None
+    if request.method == 'POST':
+        user_prompt = request.form.get('user_prompt')
+        
+        system_instruction = (
+            "Bạn là bác sĩ AI trực tuyến của Hệ thống Bệnh viện Tony. "
+            "Hãy trả lời ngắn gọn, lịch sự, có tính chuyên môn cơ bản về các triệu chứng người dùng nhập vào. "
+            "Sau khi tư vấn xong, luôn khuyên bệnh nhân đặt lịch khám trực tiếp thông qua hệ thống để bác sĩ kiểm tra."
+        )
+        full_prompt = f"{system_instruction}\n\nTriệu chứng của bệnh nhân: {user_prompt}"
+        
+        try:
+            response = ai_model.generate_content(full_prompt)
+            ai_response = response.text.replace('\n', '<br>')
+        except Exception as e:
+            ai_response = f"Hệ thống AI hiện đang bận hoặc cấu hình API bị lỗi. Vui lòng thử lại sau. (Lỗi: {str(e)})"
+            
+    return render_template('ai_consult.html', title=_('Trợ lý Y tế AI'), ai_response=ai_response)
+
 
 # ====================================================================
 # HỆ THỐNG BỆNH VIỆN - ROUTE CHO BÁC SĨ
@@ -197,7 +233,7 @@ def examine(appointment_id):
         flash(_('Không tìm thấy lịch hẹn.'))
         return redirect(url_for('main.doctor_dashboard'))
 
-    # THÊM: Lấy danh sách thuốc để bác sĩ chọn từ mục lục
+    # Lấy danh sách thuốc để bác sĩ chọn từ mục lục
     medicines = db.session.scalars(sa.select(Medicine).order_by(Medicine.name.asc())).all()
 
     form = PrescriptionForm()
@@ -214,6 +250,7 @@ def examine(appointment_id):
         flash(_('Đã hoàn tất khám bệnh.'))
         return redirect(url_for('main.doctor_dashboard'))
     return render_template('examine.html', title=_('Khám bệnh'), form=form, apt=apt, medicines=medicines)
+
 
 @bp.route('/news', methods=['GET', 'POST'])
 @login_required 
@@ -236,7 +273,9 @@ def news():
     return render_template('news.html', title=_('Bản tin Cộng đồng'), form=form,
                            posts=posts.items, next_url=next_url, prev_url=prev_url)
 
-# --- KHU VỰC DÀNH RIÊNG CHO ADMIN ---
+# ====================================================================
+# KHU VỰC DÀNH RIÊNG CHO ADMIN 
+# ====================================================================
 
 @bp.route('/admin/dashboard')
 @login_required
@@ -249,6 +288,7 @@ def admin_dashboard():
     doctors = db.session.scalars(sa.select(User).where(User.role == 'doctor')).all()
     
     return render_template('admin_dashboard.html', title='Quản trị Hệ thống', patients=patients, doctors=doctors)
+
 
 @bp.route('/admin/create_doctor', methods=['POST'])
 @login_required
@@ -272,6 +312,7 @@ def admin_create_doctor():
         
     return redirect(url_for('main.admin_dashboard'))
 
+
 @bp.route('/admin/delete_user/<int:user_id>', methods=['POST'])
 @login_required
 def admin_delete_user(user_id):
@@ -284,6 +325,7 @@ def admin_delete_user(user_id):
         flash(f'Đã xóa tài khoản: {user.username}', 'success')
         
     return redirect(url_for('main.admin_dashboard'))
+
 
 @bp.route('/admin/change_password/<int:user_id>', methods=['POST'])
 @login_required
@@ -300,7 +342,9 @@ def admin_change_password(user_id):
         
     return redirect(url_for('main.admin_dashboard'))
 
-# --- TÍNH NĂNG NÂNG CAO CHO BÁC SĨ ---
+# ====================================================================
+# TÍNH NĂNG NÂNG CAO CHO BÁC SĨ 
+# ====================================================================
 
 @bp.route('/doctor/create_offline', methods=['GET', 'POST'])
 @login_required
@@ -326,6 +370,8 @@ def create_offline():
         return redirect(url_for('main.doctor_dashboard'))
         
     return render_template('create_offline.html', title='Tạo lịch trực tiếp', form=form)
+
+
 @bp.route('/doctor/cancel_appointment/<int:id>', methods=['POST'])
 @login_required
 def doctor_cancel_appointment(id):

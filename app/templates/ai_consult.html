@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Trợ lý Y tế AI</h2>
+    <p>Hãy mô tả triệu chứng của bạn, AI sẽ đưa ra lời khuyên cơ bản (Lưu ý: Chỉ mang tính chất tham khảo).</p>
+    
+    <form method="POST" action="{{ url_for('main.ai_consult') }}">
+        <div class="form-group">
+            <textarea class="form-control" name="user_prompt" rows="4" placeholder="Ví dụ: Tôi bị đau đầu và sốt nhẹ từ tối qua..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Hỏi Bác sĩ AI</button>
+    </form>
+
+    {% if ai_response %}
+    <div class="card mt-4">
+        <div class="card-header bg-success text-white">
+            Phản hồi từ AI:
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ ai_response | safe }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
